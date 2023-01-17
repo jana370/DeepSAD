@@ -33,7 +33,7 @@ def deconvolutional_module(input, filters, kernel_size, strides=1, padding="same
         x = layers.BatchNormalization()(x)
     else:
         x = layers.Conv2DTranspose(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding,
-                                   use_bias=False, activation="softmax")(x)
+                                   use_bias=False, activation="sigmoid")(x)
     return x
 
 
@@ -74,12 +74,15 @@ def create_neural_network2():
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = x_train / 255.
 x_test = x_test / 255.
+#print(x_train[0].shape)
 #x_train = np.expand_dims(x_train, -1)
+#print(x_train[0].shape)
 encoder, autoencoder = create_neural_network2()
 
-autoencoder.fit(x_train, x_train, batch_size=128, epochs=50, shuffle=True, validation_data=(x_test, x_test))
+autoencoder.fit(x_train, x_train, batch_size=128, epochs=100, shuffle=True, validation_data=(x_test, x_test))
 
-a = autoencoder.predict(x_train[0])
+a = autoencoder.predict(np.expand_dims(x_train[0], 0))
+a = np.squeeze(a)
 
 
 
