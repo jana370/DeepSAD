@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
 from matplotlib import pyplot as plt
+import Preprocessing
+from sklearn import metrics
 
 #plt.gray()
 #plt.imshow(image)
@@ -45,40 +47,48 @@ def create_neural_network():
     autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
     return encoder, autoencoder
 
-#@tf.function
+@tf.function
 def train_step(data, center):
     with tf.GradientTape() as tape:
-        predictions = encoder(data, training=True)  # training definition necessary?
-        squared_difference = tf.reduce_sum(tf.subtract(predictions, center) ** 2, axis=1)
-        print(squared_difference.shape)
-        loss = tf.reduce_sum(squared_difference) / data.shape[0]
+        predictions = encoder(data, training=True)  # training definition necessary
+        difference = tf.norm(tf.subtract(predictions, center), axis=1) ** 2
+        loss = tf.reduce_sum(difference) / data.shape[0]
     gradients = tape.gradient(loss, encoder.trainable_variables)
-    optimizer.apply_gradient(zip(gradients, encoder.trainable_variables))
+    optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
 
 
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+train_filter = np.where(y_train == 1)
+x_train, y_train = x_train[train_filter], y_train[train_filter]
+
 x_train = x_train / 255.
 x_test = x_test / 255.
-print(max(y_train[0:500]))
-#print(x_train[0].shape)
-#x_train = np.expand_dims(x_train, -1)
-#print(x_train[0].shape)
+
 encoder, autoencoder = create_neural_network()
 
-autoencoder.fit(x_train, x_train, batch_size=128, epochs=1, shuffle=True, validation_data=(x_test, x_test))
+autoencoder.fit(x_train, x_train, batch_size=128, epochs=100, shuffle=True, validation_data=(x_test, x_test))
 
 center = encoder.predict(x_train)
 
 
 center = np.mean(center, axis=0)
-print(center)
-train_step(x_train, center)
 
-#a = autoencoder.predict(np.expand_dims(x_train[0], 0))
-#a = np.squeeze(a)
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+x_train = tf.data.Dataset.from_tensor_slices(x_train).batch(128)
+for i in range(100):
+    for datapoints in x_train:
+        train_step(datapoints, center)
+    print(f'Epoch {i + 1}')
 
 
+predictions = encoder.predict(x_test)
+anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
 
-#plt.gray()
-#plt.imshow(a)
-#plt.show()
+y_test = np.where(y_test == 1, 0, 1)
+
+auc = metrics.roc_auc_score(y_test, anomaly_score)
+
+print(auc)
+
+
