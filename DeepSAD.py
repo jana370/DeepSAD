@@ -78,12 +78,12 @@ x_train = tf.data.Dataset.from_tensor_slices(x_train).shuffle(60000).batch(128)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
 train_loss = tf.keras.metrics.Mean()
 
-for i in range(100):
+for i in range(50):
     for datapoints in x_train:
         train_step_encoder(datapoints, center)
     print(f'Epoch: {i + 1}, Loss: {train_loss.result():.4f}')
 
-print("DeepSAD training finished")
+print("Deep SAD training finished")
 predictions = encoder.predict(x_test)
 anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
 
