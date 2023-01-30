@@ -66,7 +66,7 @@ x_train = x_train / 255.
 x_test = x_test / 255.
 
 encoder, autoencoder = create_neural_network()
-autoencoder.fit(x_train, x_train, batch_size=128, epochs=100, shuffle=True, validation_data=(x_test, x_test))
+autoencoder.fit(x_train, x_train, batch_size=128, epochs=100, shuffle=True)
 
 center = encoder.predict(x_train)
 center = np.mean(center, axis=0)
