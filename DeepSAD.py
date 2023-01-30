@@ -56,6 +56,8 @@ def train_step_encoder(data, center):
     gradients = tape.gradient(loss, encoder.trainable_variables)
     optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
 
+    train_loss(loss)
+
 
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
@@ -67,18 +69,21 @@ x_test = x_test / 255.
 
 encoder, autoencoder = create_neural_network()
 autoencoder.fit(x_train, x_train, batch_size=128, epochs=100, shuffle=True)
+print("Autoencoder training finished")
 
 center = encoder.predict(x_train)
 center = np.mean(center, axis=0)
 
 x_train = tf.data.Dataset.from_tensor_slices(x_train).shuffle(60000).batch(128)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+train_loss = tf.keras.metrics.Mean()
 
 for i in range(100):
     for datapoints in x_train:
         train_step_encoder(datapoints, center)
-    print(f'Epoch {i + 1}')
+    print(f'Epoch: {i + 1}, Loss: {train_loss.result():.4f}')
 
+print("DeepSAD training finished")
 predictions = encoder.predict(x_test)
 anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
 
