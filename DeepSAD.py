@@ -1,14 +1,9 @@
-import keras.optimizers.optimizer_v1
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
-from matplotlib import pyplot as plt
 import Preprocessing
 from sklearn import metrics
 
-#plt.gray()
-#plt.imshow(image)
-#plt.show()
 
 def convolutional_module(input, filters, kernel_size, strides=1, padding="same"):
     x = layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, use_bias=False)(input)
@@ -16,6 +11,7 @@ def convolutional_module(input, filters, kernel_size, strides=1, padding="same")
     x = layers.LeakyReLU(alpha=0.1)(x)
     x = layers.MaxPooling2D((2, 2))(x)
     return x
+
 
 def deconvolutional_module(input, filters, kernel_size, strides=1, padding="same", final_layer=False):
     x = layers.LeakyReLU(alpha=0.1)(input)
@@ -35,8 +31,8 @@ def create_neural_network():
     x = convolutional_module(inputs, 8, 5)
     x = convolutional_module(x, 4, 5)
     x = layers.Flatten()(x)
-    x = layers.Dense(49, use_bias=False)(x)
-    outputs_encoder = layers.Dense(32, use_bias=False)(x)
+    x = layers.Dense(49, use_bias=False)(x) #activation function?
+    outputs_encoder = layers.Dense(32, use_bias=False)(x) #activation function?
     x = layers.Dense(49, use_bias=False)(outputs_encoder)
     x = layers.LeakyReLU(0.1)(x)
     x = tf.reshape(x, [-1, 7, 7, 1]) #komisch? nachprüfen ob [-1, 2, 4, 4] mehr Sinn macht
@@ -46,6 +42,7 @@ def create_neural_network():
     autoencoder = tf.keras.Model(inputs=inputs, outputs=outputs)
     autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
     return encoder, autoencoder
+
 
 @tf.function
 def train_step(data, center):
@@ -75,7 +72,7 @@ center = encoder.predict(x_train)
 center = np.mean(center, axis=0)
 
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
-x_train = tf.data.Dataset.from_tensor_slices(x_train).batch(128)
+x_train = tf.data.Dataset.from_tensor_slices(x_train).shuffle(60000).batch(128)
 for i in range(100):
     for datapoints in x_train:
         train_step(datapoints, center)
