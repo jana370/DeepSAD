@@ -3,7 +3,8 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 
 
-class mnistPreProcessing():
+class PreProcessing():
+    
     def load_dataset(self, datasetname: str):
         if datasetname == "mnist":
             (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
