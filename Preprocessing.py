@@ -117,16 +117,16 @@ class PreProcessing():
                 new_labels[i] = int(-1)
         test_data = (dataset[0], new_labels)
         return test_data   
-        return (x_train, y_train), (x_test, y_test)
 
-    def divide_dataset(self, outlier_number:int, normal_number:int):
-        (x_train, y_train), (x_test, y_test) = self.load_dataset()
-        # convert the data to tensorflow dataset
-        train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-        test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-        train_normal = train_dataset.filter(lambda x, y: tf.math.equal(y, normal_number))
-        train_outlier = train_dataset.filter(lambda x, y: tf.math.equal(y, outlier_number))
-        test_normal = test_dataset.filter(lambda x, y: tf.math.equal(y, normal_number))
-        test_outlier = test_dataset.filter(lambda x, y: tf.math.equal(y, outlier_number)) 
-        return train_normal, train_outlier, test_normal, test_outlier
-
+if __name__ == "__main__":
+    test = PreProcessing()
+    train_dataset, test_dataset = test.load_dataset("cifar10")
+    test_data = test.relable_test_data(test_dataset, [9])
+    train_data_labeled, train_data_unlabeled = test.make_data_semisupervised(train_dataset,[9], [1], [4], 0.0, 0.01, 0.1, 0.0)
+    
+    plt.imshow(train_data_unlabeled[3333], cmap='gray')
+    plt.show()
+    #print(train_data_labeled[1][60])
+    #print(train_data_unlabeled[2][1000])
+    print(len(train_dataset[0]))
+    
