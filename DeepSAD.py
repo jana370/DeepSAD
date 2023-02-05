@@ -7,7 +7,7 @@ from sklearn import metrics
 
 def convolutional_module(input, filters, kernel_size, strides=1, padding="same"): # strides and padding could currently be removed
     x = layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, use_bias=False,
-                      kernel_regularizer="l2")(input)
+                      kernel_regularizer=tf.keras.regularizers.l2(1e-5))(input)
     x = layers.BatchNormalization()(x)
     x = layers.LeakyReLU(alpha=0.1)(x)
     x = layers.MaxPooling2D((2, 2))(x)
@@ -19,11 +19,11 @@ def deconvolutional_module(input, filters, kernel_size, strides=1, padding="same
     x = layers.UpSampling2D((2, 2))(x)
     if not final_layer:
         x = layers.Conv2DTranspose(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding,
-                                   use_bias=False, kernel_regularizer="l2")(x)
+                                   use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
         x = layers.BatchNormalization()(x)
     else:
         x = layers.Conv2DTranspose(filters, kernel_size, strides=strides, padding=padding, use_bias=False,
-                                   kernel_regularizer="l2", activation="sigmoid")(x)
+                                   kernel_regularizer=tf.keras.regularizers.l2(1e-5), activation="sigmoid")(x)
     return x
 
 
@@ -32,11 +32,11 @@ def create_neural_network():
     x = convolutional_module(inputs, 8, 5)
     x = convolutional_module(x, 4, 5)
     x = layers.Flatten()(x)
-    x = layers.Dense(49, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.Dense(49, use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
     x = layers.LeakyReLU(0.1)(x)
-    outputs_encoder = layers.Dense(32, use_bias=False, kernel_regularizer="l2")(x)
+    outputs_encoder = layers.Dense(32, use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
     x = layers.LeakyReLU(0.1)(outputs_encoder)
-    x = layers.Dense(49, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.Dense(49, use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
     x = layers.LeakyReLU(0.1)(x)
     x = tf.reshape(x, [-1, 7, 7, 1])
     x = deconvolutional_module(x, 4, 5)
@@ -56,10 +56,12 @@ def train_step_encoder(data, center):
         loss = tf.reduce_sum(difference) / data.shape[0]
     gradients = tape.gradient(loss, encoder.trainable_variables)
     optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
-
     train_loss(loss)
 
 
+#Preprocessor = Preprocessing.PreProcessing("mnist", [1], [0], [2])
+#(x_train, y_train) = Preprocessor.get_train_data()
+#x_test = Preprocessor.get_test_data()
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
 train_filter = np.where(y_train == 1)
@@ -67,6 +69,12 @@ x_train, y_train = x_train[train_filter], y_train[train_filter]
 
 x_train = x_train / 255.
 x_test = x_test / 255.
+#print(x_train[0].shape)
+#print(x_train[1].shape)
+#print(x_train[1])
+#print(y_train.shape)
+#print(x_test[0].shape)
+#print(x_test[1].shape)
 
 encoder, autoencoder = create_neural_network()
 autoencoder.fit(x_train, x_train, batch_size=128, epochs=100, shuffle=True)
@@ -82,7 +90,7 @@ train_loss = tf.keras.metrics.Mean()
 for i in range(50):
     for datapoints in x_train:
         train_step_encoder(datapoints, center)
-    print(f'Epoch: {i + 1}, Loss: {train_loss.result():.4f}')
+    print(f"Epoch: {i + 1}, Loss: {train_loss.result():.4f}")
 
 print("Deep SAD training finished")
 predictions = encoder.predict(x_test)
