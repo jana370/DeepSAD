@@ -47,6 +47,50 @@ def create_neural_network():
     autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
     return encoder, autoencoder
 
+def create_neural_network_cifar10():
+    inputs = tf.keras.Input(shape=(32, 32, 3))
+    x = convolutional_module(inputs, 32, 5)
+    x = convolutional_module(x, 64, 5)
+    x = convolutional_module(x, 128, 5)
+    x = layers.Flatten()(x)
+    x = layers.Dense(64, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(x)
+    outputs_encoder = layers.Dense(128, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(outputs_encoder)
+    x = layers.Dense(64, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(x)
+    x = tf.reshape(x, [-1, 8, 8, 1])
+    x = deconvolutional_module(x, 4, 5)
+    outputs = deconvolutional_module(x, 1, 5, final_layer=True)
+
+    encoder = tf.keras.Model(inputs=inputs, outputs=outputs_encoder)
+    autoencoder = tf.keras.Model(inputs=inputs, outputs=outputs)
+    autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
+    return encoder, autoencoder
+def create_neural_network_fmnist():
+    inputs = tf.keras.Input(shape=(28, 28, 1))
+    print(inputs.shape)
+    x = convolutional_module(inputs, 16, 5)
+    x = convolutional_module(x, 32, 5)
+    x = layers.Flatten()(x)
+    x = layers.Dense(49, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(x)
+    x = layers.Dense(64, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(x)
+    outputs_encoder = layers.Dense(32, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(outputs_encoder)
+    x = layers.Dense(64, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(x)
+    x = layers.Dense(49, use_bias=False, kernel_regularizer="l2")(x)
+    x = layers.LeakyReLU(0.1)(x)
+    x = tf.reshape(x, [-1, 7, 7, 1])
+    x = deconvolutional_module(x, 4, 5)
+    outputs = deconvolutional_module(x, 1, 5, final_layer=True)
+
+    encoder = tf.keras.Model(inputs=inputs, outputs=outputs_encoder)
+    autoencoder = tf.keras.Model(inputs=inputs, outputs=outputs)
+    autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
+    return encoder, autoencoder
 
 @tf.function
 def train_step_encoder(data, center):
