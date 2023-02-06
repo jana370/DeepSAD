@@ -115,12 +115,17 @@ def train_step_encoder(data, center):
     optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
     train_loss(loss)
 
-
-Preprocessor = Preprocessing.PreProcessing("mnist", [1], [0], [2], ratio_known_outlier=0.1, ratio_known_normal=0.1)
+dataset = "cifar10"
+Preprocessor = Preprocessing.PreProcessing(dataset, [1], [0], [2], ratio_known_outlier=0.1, ratio_known_normal=0.1)
 (labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
 (test_data, test_data_labels) = Preprocessor.get_test_data()
 
-encoder, autoencoder = create_neural_network()
+if dataset == "mnist":
+    encoder, autoencoder = create_neural_network()
+elif dataset == "fmnist":
+    encoder, autoencoder = create_neural_network_fmnist()
+elif dataset == "cifar10":
+    encoder, autoencoder = create_neural_network_cifar10()
 autoencoder.fit(unlabeled_data, unlabeled_data, batch_size=128, epochs=100, shuffle=True)
 print("Autoencoder training finished")
 
@@ -129,7 +134,6 @@ center = np.mean(center, axis=0)
 
 data = np.concatenate((labeled_data, unlabeled_data), axis=0)
 labels = np.concatenate((labeled_data_labels, unlabeled_data_labels), axis=0)
-print(labels)
 data = tf.data.Dataset.from_tensor_slices((data, labels)).shuffle(60000).batch(128)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
 train_loss = tf.keras.metrics.Mean()
