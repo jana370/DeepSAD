@@ -114,7 +114,7 @@ class PreProcessing():
         unlabeled_data_array= np.array(unlabeled_data_list)
         unlabeled_labels_array = np.array(unlabeled_labels_list)
         unlabeled_new_labels_array = np.array(unlabeled_new_labels_list)
-        unlabeled_data = unlabeled_data_array
+        unlabeled_data = (unlabeled_data_array, unlabeled_new_labels_array)
         #combine data: np.hstack((unlabeled_data_array, labeled_data_array))    
         return labeled_data, unlabeled_data
     
