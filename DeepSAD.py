@@ -51,51 +51,54 @@ def create_neural_network():
 @tf.function
 def train_step_encoder(data, center):
     with tf.GradientTape() as tape:
-        predictions = encoder(data, training=True)  # training definition necessary
-        difference = tf.norm(tf.subtract(predictions, center), axis=1) ** 2
-        loss = tf.reduce_sum(difference) / data.shape[0]
+        predictions = encoder(data[0], training=True)
+        unlabeled_mask = tf.where(data[1] == 0)
+        unlabeled_predictions = tf.gather(predictions, unlabeled_mask)
+        unlabeled_differences = tf.norm(tf.subtract(unlabeled_predictions, center), axis=2) ** 2
+        unlabeled_loss = tf.reduce_sum(unlabeled_differences) / data[0].shape[0]
+        labeled_normal_mask = tf.where(data[1] == 1)
+        labeled_normal_predictions = tf.gather(predictions, labeled_normal_mask)
+        labeled_normal_differences = tf.norm(tf.subtract(labeled_normal_predictions, center), axis=2) ** 2
+        labeled_normal_loss = tf.reduce_sum(labeled_normal_differences) / data[0].shape[0]
+        labeled_outlier_mask = tf.where(data[1] == -1)
+        labeled_outlier_predictions = tf.gather(predictions, labeled_outlier_mask)
+        labeled_outlier_differences = 1 / (tf.norm(tf.subtract(labeled_outlier_predictions, center), axis=2) ** 2 + 1e-5
+                                           )
+        labeled_outlier_loss = tf.reduce_sum(labeled_outlier_differences) / data[0].shape[0]
+
+        loss = unlabeled_loss + 1 * (labeled_normal_loss + labeled_outlier_loss)
     gradients = tape.gradient(loss, encoder.trainable_variables)
     optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
     train_loss(loss)
 
 
-#Preprocessor = Preprocessing.PreProcessing("mnist", [1], [0], [2])
-#(x_train, y_train) = Preprocessor.get_train_data()
-#x_test = Preprocessor.get_test_data()
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-
-train_filter = np.where(y_train == 1)
-x_train, y_train = x_train[train_filter], y_train[train_filter]
-
-x_train = x_train / 255.
-x_test = x_test / 255.
-#print(x_train[0].shape)
-#print(x_train[1].shape)
-#print(x_train[1])
-#print(y_train.shape)
-#print(x_test[0].shape)
-#print(x_test[1].shape)
+Preprocessor = Preprocessing.PreProcessing("mnist", [1], [0], [2], ratio_known_outlier=0.1, ratio_known_normal=0.1)
+(labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
+(test_data, test_data_labels) = Preprocessor.get_test_data()
 
 encoder, autoencoder = create_neural_network()
-autoencoder.fit(x_train, x_train, batch_size=128, epochs=100, shuffle=True)
+autoencoder.fit(unlabeled_data, unlabeled_data, batch_size=128, epochs=100, shuffle=True)
 print("Autoencoder training finished")
 
-center = encoder.predict(x_train)
+center = encoder.predict(unlabeled_data)  # combine unlabeled data and data labeled as normal?
 center = np.mean(center, axis=0)
 
-x_train = tf.data.Dataset.from_tensor_slices(x_train).shuffle(60000).batch(128)
+data = np.concatenate((labeled_data, unlabeled_data), axis=0)
+labels = np.concatenate((labeled_data_labels, unlabeled_data_labels), axis=0)
+print(labels)
+data = tf.data.Dataset.from_tensor_slices((data, labels)).shuffle(60000).batch(128)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
 train_loss = tf.keras.metrics.Mean()
 
 for i in range(50):
-    for datapoints in x_train:
+    for datapoints in data:
         train_step_encoder(datapoints, center)
     print(f"Epoch: {i + 1}, Loss: {train_loss.result():.4f}")
 
 print("Deep SAD training finished")
-predictions = encoder.predict(x_test)
+predictions = encoder.predict(test_data)
 anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
 
-y_test = np.where(y_test == 1, 0, 1)
-auc = metrics.roc_auc_score(y_test, anomaly_score)
+test_data_labels = np.where(test_data_labels == 1, 0, 1)  # in preprocessing?
+auc = metrics.roc_auc_score(test_data_labels, anomaly_score)
 print(auc)
