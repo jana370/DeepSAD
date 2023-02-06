@@ -118,19 +118,19 @@ class PreProcessing():
         #combine data: np.hstack((unlabeled_data_array, labeled_data_array))    
         return labeled_data, unlabeled_data
     
-    def relable_test_data(self, dataset: tuple):
+    def relabel_test_data(self, dataset: tuple):
         new_labels = np.empty(len(dataset[0]))
         for i, label in enumerate(dataset[1]):
             if label in self.normal_class:
-                new_labels[i] = int(1)
+                new_labels[i] = int(0)
             else:
-                new_labels[i] = int(-1)
+                new_labels[i] = int(1)
         test_data = (dataset[0], new_labels)
         return test_data
     
     def get_test_data(self):
         train_data, test_data = self.load_dataset()
-        test_data = self.relable_test_data(test_data)
+        test_data = self.relabel_test_data(test_data)
         return test_data
     
     def get_train_data(self):

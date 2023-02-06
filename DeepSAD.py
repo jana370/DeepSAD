@@ -47,6 +47,7 @@ def create_neural_network():
     autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
     return encoder, autoencoder
 
+
 def create_neural_network_cifar10():
     inputs = tf.keras.Input(shape=(32, 32, 3))
     x = convolutional_module(inputs, 32, 5)
@@ -67,6 +68,8 @@ def create_neural_network_cifar10():
     autoencoder = tf.keras.Model(inputs=inputs, outputs=outputs)
     autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
     return encoder, autoencoder
+
+
 def create_neural_network_fmnist():
     inputs = tf.keras.Input(shape=(28, 28, 1))
     print(inputs.shape)
@@ -92,6 +95,7 @@ def create_neural_network_fmnist():
     autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss=tf.keras.losses.MeanSquaredError())
     return encoder, autoencoder
 
+
 @tf.function
 def train_step_encoder(data, center):
     with tf.GradientTape() as tape:
@@ -114,6 +118,7 @@ def train_step_encoder(data, center):
     gradients = tape.gradient(loss, encoder.trainable_variables)
     optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
     train_loss(loss)
+
 
 dataset = "cifar10"
 Preprocessor = Preprocessing.PreProcessing(dataset, [1], [0], [2], ratio_known_outlier=0.1, ratio_known_normal=0.1)
@@ -147,6 +152,5 @@ print("Deep SAD training finished")
 predictions = encoder.predict(test_data)
 anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
 
-test_data_labels = np.where(test_data_labels == 1, 0, 1)  # in preprocessing?
 auc = metrics.roc_auc_score(test_data_labels, anomaly_score)
 print(auc)
