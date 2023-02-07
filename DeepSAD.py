@@ -54,14 +54,11 @@ def create_neural_network_cifar10():
     x = convolutional_module(x, 64, 5)
     x = convolutional_module(x, 128, 5)
     x = layers.Flatten()(x)
-    x = layers.Dense(64, use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
-    x = layers.LeakyReLU(0.1)(x)
     outputs_encoder = layers.Dense(128, use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
     x = layers.LeakyReLU(0.1)(outputs_encoder)
-    x = layers.Dense(64, use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
-    x = layers.LeakyReLU(0.1)(x)
-    x = tf.reshape(x, [-1, 8, 8, 1])
-    x = deconvolutional_module(x, 4, 5)
+    x = tf.reshape(x, [-1, 4, 4, 8])
+    x = deconvolutional_module(x, 64, 5)
+    x = deconvolutional_module(x, 32, 5)
     outputs = deconvolutional_module(x, 1, 5, final_layer=True)
 
     encoder = tf.keras.Model(inputs=inputs, outputs=outputs_encoder)
@@ -87,7 +84,7 @@ def create_neural_network_fmnist():
     x = layers.Dense(49, use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(1e-5))(x)
     x = layers.LeakyReLU(0.1)(x)
     x = tf.reshape(x, [-1, 7, 7, 1])
-    x = deconvolutional_module(x, 4, 5)
+    x = deconvolutional_module(x, 16, 5)
     outputs = deconvolutional_module(x, 1, 5, final_layer=True)
 
     encoder = tf.keras.Model(inputs=inputs, outputs=outputs_encoder)
@@ -121,7 +118,7 @@ def train_step_encoder(data, center):
 
 
 dataset = "cifar10"
-Preprocessor = Preprocessing.PreProcessing(dataset, [1], [0], [2], ratio_known_outlier=0.1, ratio_known_normal=0.1)
+Preprocessor = Preprocessing.PreProcessing(dataset, [1], [0,3,4,5,6,7,8,9], [2], ratio_known_outlier=0.1, ratio_known_normal=0.1)
 (labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
 (test_data, test_data_labels) = Preprocessor.get_test_data()
 
@@ -134,7 +131,10 @@ elif dataset == "cifar10":
 autoencoder.fit(unlabeled_data, unlabeled_data, batch_size=128, epochs=100, shuffle=True)
 print("Autoencoder training finished")
 
-center = encoder.predict(unlabeled_data)  # combine unlabeled data and data labeled as normal?
+normal_mask = np.where(labeled_data_labels == 0)
+normal_data = labeled_date[normal_mask]
+normal_data = np.concatenate((unlabeled_data, normal_data), axis=0)
+center = encoder.predict(normal_data)  # combine unlabeled data and data labeled as normal!
 center = np.mean(center, axis=0)
 
 data = np.concatenate((labeled_data, unlabeled_data), axis=0)
