@@ -5,12 +5,15 @@ from matplotlib import pyplot as plt
 
 class PreProcessing():
     
-    def __init__(self, datasetname, normal_class:list, outlier_class: list, known_outlier_class: list, 
+    def __init__(self, datasetname, normal_class:list, known_outlier_class: list, 
                  ratio_known_normal = 0.0, ratio_known_outlier = 0.01, ratio_pollution = 0.0, ratio_polluted_label_data = 0.0):
         self.datasetname = datasetname
         self.normal_class = normal_class
-        self.outlier_class = outlier_class
         self.known_outlier_classes = known_outlier_class
+        self.outlier_class = list(range(0, 10))
+        self.outlier_class = [i for i in self.outlier_class if i not in self.normal_class]
+        self.outlier_class = [i for i in self.outlier_class if i not in self.known_outlier_classes]
+        print(self.outlier_class)
         self.ratio_known_normal = ratio_known_normal
         self. ratio_known_outlier = ratio_known_outlier
         self.ratio_pollution = ratio_pollution
@@ -51,7 +54,7 @@ class PreProcessing():
         n_unlabeled_outlier = int(x[2])
         n_known_outlier = int(x[3])
         
-        n_wrong_label_normal = int(self.ratio_polluted_label_data * n_known_outlier)
+        n_wrong_label_normal = int(self.ratio_polluted_label_data * n_known_normal)
         n_wrong_label_outlier = int(self.ratio_polluted_label_data*n_known_outlier)            
         n_known_normal = int(n_known_normal - n_wrong_label_normal)
         n_known_outlier = int(n_known_outlier - n_wrong_label_outlier)
