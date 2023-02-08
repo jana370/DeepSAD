@@ -131,13 +131,10 @@ categories_fmnist = ((0, 2, 4, 6), (1, 3), (5, 7, 8, 9))
 categories_cifar10 = ((0, 1, 8, 9), (3, 6), (2, 4, 5, 7))
 
 if dataset == "mnist":
-    encoder, autoencoder = create_neural_network()
     categories = categories_mnist
 elif dataset == "fmnist":
-    encoder, autoencoder = create_neural_network_fmnist()
     categories = categories_fmnist
 elif dataset == "cifar10":
-    encoder, autoencoder = create_neural_network_cifar10()
     categories = categories_cifar10
 
 results = []
@@ -152,6 +149,13 @@ for i in categories:
             normal_mask = np.where(labeled_data_labels == 0)
             normal_data = labeled_data[normal_mask]
             normal_data = np.concatenate((unlabeled_data, normal_data), axis=0)
+
+            if dataset == "mnist":
+                encoder, autoencoder = create_neural_network()
+            elif dataset == "fmnist":
+                encoder, autoencoder = create_neural_network_fmnist()
+            elif dataset == "cifar10":
+                encoder, autoencoder = create_neural_network_cifar10()
 
             print("Starting Autoencoder training")
             autoencoder.fit(normal_data, normal_data, batch_size=128, epochs=150, shuffle=True)
