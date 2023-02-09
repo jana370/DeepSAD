@@ -3,9 +3,6 @@ import tensorflow as tf
 from tensorflow.keras import layers
 import Preprocessing
 from sklearn import metrics
-import pandas as pd
-import pathlib
-
 
 def convolutional_module(input, filters, kernel_size, strides=1, padding="same"): # strides and padding could currently be removed
     x = layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, use_bias=False,
@@ -95,7 +92,7 @@ def create_neural_network_fmnist():
 
 
 @tf.function
-def big_train_step_encoder(data, center, mode, optimizer):
+def big_train_step_encoder(data, center, mode):
     with tf.GradientTape() as tape:
         predictions = encoder(data[0], training=True)
         unlabeled_mask = tf.where(data[1] == 0)
@@ -152,7 +149,7 @@ def small_train_step_encoder(data, center, mode, optimizer):
     train_loss(loss)
 
 
-dataset = "cifar10"
+dataset = "mnist"
 mode = "standard"
 
 categories_mnist = ((0, 6, 8, 9), (1, 4, 7), (2, 3, 5))
@@ -169,57 +166,44 @@ elif dataset == "cifar10":
     categories = categories_cifar10
     encoder, autoencoder = create_neural_network_cifar10()
 
-initial_weights = autoencoder.get_weights()
-results = []
+Preprocessor = Preprocessing.PreProcessing(dataset, categories[1], categories[2], ratio_known_outlier=0.05, ratio_known_normal=0.0, ratio_pollution=0.1, ratio_polluted_label_data=0.01)
+(labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
+(test_data, test_data_labels) = Preprocessor.get_test_data()
 
-optimizer1 = tf.keras.optimizers.Adam(learning_rate=0.0001)
-optimizer2 = tf.keras.optimizers.Adam(learning_rate=0.00001)
+normal_mask = np.where(labeled_data_labels == 0)
+normal_data = labeled_data[normal_mask]
+normal_data = np.concatenate((unlabeled_data, normal_data), axis=0)
+
+print("Starting Autoencoder training")
+autoencoder.fit(normal_data, normal_data, batch_size=128, epochs=150, shuffle=True)
+print("Autoencoder training finished")
+
+center = encoder.predict(normal_data)
+center = np.mean(center, axis=0)
+
+data = np.concatenate((labeled_data, unlabeled_data), axis=0)
+labels = np.concatenate((labeled_data_labels, unlabeled_data_labels), axis=0)
+data = tf.data.Dataset.from_tensor_slices((data, labels)).shuffle(60000).batch(128)
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
+
 train_loss = tf.keras.metrics.Mean()
 
-for i in categories:
-    for j in categories:
-        if not i == j:
-            Preprocessor = Preprocessing.PreProcessing(dataset, i, j, ratio_known_outlier=0.05, ratio_known_normal=0.0, ratio_pollution=0.1, ratio_polluted_label_data=0.00)
-            (labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
-            (test_data, test_data_labels) = Preprocessor.get_test_data()
+print("Starting Deep SAD training")
+for k in range(50):
+    for datapoints in data:
+        big_train_step_encoder(datapoints, center, mode)
+    print(f"Epoch: {k + 1}, Loss: {train_loss.result():.4f}")
+print("learning rate reduced to 0.00001")
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.00001)
+for k in range(50, 150):
+    for datapoints in data:
+        big_train_step_encoder(datapoints, center, mode)
+    print(f"Epoch: {k + 1}, Loss: {train_loss.result():.4f}")
 
-            autoencoder.set_weights(initial_weights)
+print("Deep SAD training finished")
+predictions = encoder.predict(test_data)
+anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
 
-            normal_mask = np.where(labeled_data_labels == 0)
-            normal_data = labeled_data[normal_mask]
-            normal_data = np.concatenate((unlabeled_data, normal_data), axis=0)
+auc = metrics.roc_auc_score(test_data_labels, anomaly_score)
+print(auc)
 
-            print("Starting Autoencoder training")
-            autoencoder.fit(normal_data, normal_data, batch_size=128, epochs=150, shuffle=True)
-            print("Autoencoder training finished")
-
-            center = encoder.predict(normal_data)
-            center = np.mean(center, axis=0)
-
-            data = np.concatenate((labeled_data, unlabeled_data), axis=0)
-            labels = np.concatenate((labeled_data_labels, unlabeled_data_labels), axis=0)
-            data = tf.data.Dataset.from_tensor_slices((data, labels)).shuffle(60000).batch(128)
-
-            print("Starting Deep SAD training")
-            for k in range(50):
-                for datapoints in data:
-                    big_train_step_encoder(datapoints, center, mode, optimizer1)
-                print(f"Epoch: {k + 1}, Loss: {train_loss.result():.4f}")
-            print("learning rate reduced to 0.00001")
-            for k in range(50, 150):
-                for datapoints in data:
-                    small_train_step_encoder(datapoints, center, mode, optimizer2)
-                print(f"Epoch: {k + 1}, Loss: {train_loss.result():.4f}")
-
-            print("Deep SAD training finished")
-            predictions = encoder.predict(test_data)
-            anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
-
-            auc = metrics.roc_auc_score(test_data_labels, anomaly_score)
-            print(auc)
-            results.append(auc)
-
-results_dataframe = pd.DataFrame({"Results Evaluation": results})
-file_name = f"{dataset}_{mode}_pollution0_00.csv"
-path_file = pathlib.Path(f"results/{file_name}")
-results_dataframe.to_csv(path_file, index=False)
