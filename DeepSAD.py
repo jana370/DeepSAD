@@ -92,7 +92,7 @@ def create_neural_network_fmnist():
 
 
 @tf.function
-def big_train_step_encoder(data, center, mode):
+def train_step_encoder(data, center, mode):
     with tf.GradientTape() as tape:
         predictions = encoder(data[0], training=True)
         unlabeled_mask = tf.where(data[1] == 0)
@@ -120,36 +120,7 @@ def big_train_step_encoder(data, center, mode):
     train_loss(loss)
 
 
-@tf.function
-def small_train_step_encoder(data, center, mode, optimizer):
-    with tf.GradientTape() as tape:
-        predictions = encoder(data[0], training=True)
-        unlabeled_mask = tf.where(data[1] == 0)
-        unlabeled_predictions = tf.gather(predictions, unlabeled_mask)
-        unlabeled_differences = tf.norm(tf.subtract(unlabeled_predictions, center), axis=2) ** 2
-        unlabeled_loss = tf.reduce_sum(unlabeled_differences) / data[0].shape[0]
-        labeled_normal_mask = tf.where(data[1] == 1)
-        labeled_normal_predictions = tf.gather(predictions, labeled_normal_mask)
-        labeled_normal_differences = tf.norm(tf.subtract(labeled_normal_predictions, center), axis=2) ** 2
-        labeled_normal_loss = tf.reduce_sum(labeled_normal_differences) / data[0].shape[0]
-        labeled_outlier_mask = tf.where(data[1] == -1)
-        labeled_outlier_predictions = tf.gather(predictions, labeled_outlier_mask)
-        labeled_outlier_differences = (1 / tf.norm(tf.subtract(labeled_outlier_predictions, center), axis=2)) ** 2 + 1e-5
-
-        labeled_outlier_loss = tf.reduce_sum(labeled_outlier_differences) / data[0].shape[0]
-
-        if mode == "standard":
-            loss = unlabeled_loss + labeled_normal_loss + labeled_outlier_loss
-        if mode == "standard_normal":
-            loss = unlabeled_loss + 3 * (labeled_normal_loss + labeled_outlier_loss)
-        if mode == "extended":
-            loss = unlabeled_loss + 2 * labeled_normal_loss + 4 * labeled_outlier_loss
-    gradients = tape.gradient(loss, encoder.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
-    train_loss(loss)
-
-
-dataset = "mnist"
+dataset = "fmnist"
 mode = "standard"
 
 categories_mnist = ((0, 6, 8, 9), (1, 4, 7), (2, 3, 5))
@@ -166,7 +137,7 @@ elif dataset == "cifar10":
     categories = categories_cifar10
     encoder, autoencoder = create_neural_network_cifar10()
 
-Preprocessor = Preprocessing.PreProcessing(dataset, categories[1], categories[2], ratio_known_outlier=0.05, ratio_known_normal=0.0, ratio_pollution=0.1, ratio_polluted_label_data=0.01)
+Preprocessor = Preprocessing.PreProcessing(dataset, categories[1], categories[0], ratio_known_outlier=0.05, ratio_known_normal=0.0, ratio_pollution=0.1, ratio_polluted_label_data=0.01)
 (labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
 (test_data, test_data_labels) = Preprocessor.get_test_data()
 
@@ -191,13 +162,13 @@ train_loss = tf.keras.metrics.Mean()
 print("Starting Deep SAD training")
 for k in range(50):
     for datapoints in data:
-        big_train_step_encoder(datapoints, center, mode)
+        train_step_encoder(datapoints, center, mode)
     print(f"Epoch: {k + 1}, Loss: {train_loss.result():.4f}")
 print("learning rate reduced to 0.00001")
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.00001)
 for k in range(50, 150):
     for datapoints in data:
-        big_train_step_encoder(datapoints, center, mode)
+        train_step_encoder(datapoints, center, mode)
     print(f"Epoch: {k + 1}, Loss: {train_loss.result():.4f}")
 
 print("Deep SAD training finished")
