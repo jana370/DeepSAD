@@ -4,6 +4,7 @@ from tensorflow.keras import layers
 import Preprocessing
 from sklearn import metrics
 
+
 def convolutional_module(input, filters, kernel_size, strides=1, padding="same"): # strides and padding could currently be removed
     x = layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, use_bias=False,
                       kernel_regularizer=tf.keras.regularizers.l2(1e-5))(input)
@@ -110,7 +111,7 @@ def train_step_encoder(data, center, mode):
         labeled_outlier_loss = tf.reduce_sum(labeled_outlier_differences) / data[0].shape[0]
 
         if mode == "standard":
-            loss = unlabeled_loss + labeled_normal_loss + labeled_outlier_loss
+            loss = unlabeled_loss + labeled_normal_loss + 3 * labeled_outlier_loss
         if mode == "standard_normal":
             loss = unlabeled_loss + 3 * (labeled_normal_loss + labeled_outlier_loss)
         if mode == "extended":
@@ -120,7 +121,7 @@ def train_step_encoder(data, center, mode):
     train_loss(loss)
 
 
-dataset = "fmnist"
+dataset = "cifar10"
 mode = "standard"
 
 categories_mnist = ((0, 6, 8, 9), (1, 4, 7), (2, 3, 5))
@@ -137,13 +138,19 @@ elif dataset == "cifar10":
     categories = categories_cifar10
     encoder, autoencoder = create_neural_network_cifar10()
 
-Preprocessor = Preprocessing.PreProcessing(dataset, categories[1], categories[0], ratio_known_outlier=0.05, ratio_known_normal=0.0, ratio_pollution=0.1, ratio_polluted_label_data=0.01)
+Preprocessor = Preprocessing.PreProcessing(dataset, categories[2], categories[1], ratio_known_outlier=0.00, ratio_known_normal=0.00, ratio_pollution=0.1, ratio_polluted_label_data=0.00)
 (labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
 (test_data, test_data_labels) = Preprocessor.get_test_data()
 
-normal_mask = np.where(labeled_data_labels == 0)
-normal_data = labeled_data[normal_mask]
-normal_data = np.concatenate((unlabeled_data, normal_data), axis=0)
+if labeled_data.size > 0 and unlabeled_data.size > 0:
+    normal_mask = np.where(labeled_data_labels == 0, 1, 0)
+    normal_data = labeled_data[normal_mask]
+    normal_data = np.concatenate((unlabeled_data, normal_data), axis=0)
+elif labeled_data.size > 0:
+    normal_mask = np.where(labeled_data_labels == 0, 1, 0)
+    normal_data = labeled_data[normal_mask]
+else:
+    normal_data = unlabeled_data
 
 print("Starting Autoencoder training")
 autoencoder.fit(normal_data, normal_data, batch_size=128, epochs=150, shuffle=True)
@@ -152,11 +159,18 @@ print("Autoencoder training finished")
 center = encoder.predict(normal_data)
 center = np.mean(center, axis=0)
 
-data = np.concatenate((labeled_data, unlabeled_data), axis=0)
-labels = np.concatenate((labeled_data_labels, unlabeled_data_labels), axis=0)
+if labeled_data.size > 0 and unlabeled_data.size > 0:
+    data = np.concatenate((labeled_data, unlabeled_data), axis=0)
+    labels = np.concatenate((labeled_data_labels, unlabeled_data_labels), axis=0)
+elif labeled_data.size > 0:
+    data = labeled_data
+    labels = labeled_data_labels
+else:
+    data = unlabeled_data
+    labels = unlabeled_data_labels
+
 data = tf.data.Dataset.from_tensor_slices((data, labels)).shuffle(60000).batch(128)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
-
 train_loss = tf.keras.metrics.Mean()
 
 print("Starting Deep SAD training")
@@ -177,4 +191,5 @@ anomaly_score = tf.norm(tf.subtract(predictions, center), axis=1)
 
 auc = metrics.roc_auc_score(test_data_labels, anomaly_score)
 print(auc)
+
 
