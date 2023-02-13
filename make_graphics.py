@@ -37,8 +37,6 @@ if __name__ == "__main__":
     datasets = ("mnist", "fmnist", "cifar10")
     decimals = ("00", "05", "10", "20")
     architectures = ("standard_", "standard_normal_", "extended_")
-    dataset="mnist"
-    decimal = "05"
 
     fig = plt.figure(figsize=(4, 3))
     for dataset_iteration, dataset in enumerate(datasets):
