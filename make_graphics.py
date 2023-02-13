@@ -17,8 +17,9 @@ def get_statistics(data):
 def make_subplot(dataset_iteration, decimal_iteration, data1, data2=None, data3=None):
     ax = plt.subplot(3, 4, dataset_iteration * 4 + decimal_iteration + 1)
     mean, sd = get_statistics(data1)
-    ax.errorbar(0.5, mean, sd, fmt="o", linewidth=2, capsize=6, label="only labeled outliers", color="skyblue")
+    plt.errorbar(0.5, mean, sd, fmt="o", linewidth=2, capsize=6, label="no labeled data", color="orange")
     if data2 is not None:
+        plt.errorbar(0.5, mean, sd, fmt="o", linewidth=2, capsize=6, label="only labeled outliers", color="skyblue")
         mean, sd = get_statistics(data2)
         plt.errorbar(1.0, mean, sd, fmt="o", linewidth=2, capsize=6, label="labeled outliers and normal data",
                      color="royalblue")
