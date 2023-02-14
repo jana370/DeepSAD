@@ -11,27 +11,28 @@ def get_data(dataset, decimal, architecture=""):
 
 
 def get_statistics(data):
-    return statistics.mean(data), statistics.stdev(data)
-
+    tuple = (statistics.mean(data), statistics.stdev(data))
+    return tuple
 
 def make_subplot(dataset_iteration, decimal_iteration, data1, data2=None, data3=None):
     ax = plt.subplot(3, 4, dataset_iteration * 4 + decimal_iteration + 1)
     mean, sd = get_statistics(data1)
-    plt.errorbar(0.5, mean, sd, fmt="o", linewidth=2, capsize=6, label="no labeled data", color="orange")
+    plt.errorbar(0.5, mean, sd, fmt="o", linewidth=4, capsize=8, label="no labeled data", color="orange")
     if data2 is not None:
-        plt.errorbar(0.5, mean, sd, fmt="o", linewidth=2, capsize=6, label="only labeled outliers", color="skyblue")
+        plt.errorbar(0.5, mean, sd, fmt="o", linewidth=4, capsize=8, label="only labeled outliers", color="skyblue")
         mean, sd = get_statistics(data2)
-        plt.errorbar(1.0, mean, sd, fmt="o", linewidth=2, capsize=6, label="labeled outliers and normal data",
+        plt.errorbar(1.0, mean, sd, fmt="o", linewidth=4, capsize=8, label="labeled outliers and normal data",
                      color="royalblue")
         mean, sd = get_statistics(data3)
-        plt.errorbar(1.5, mean, sd, fmt="o", linewidth=2, capsize=6, color="midnightblue",
+        plt.errorbar(1.5, mean, sd, fmt="o", linewidth=4, capsize=8, color="midnightblue",
                  label="different weights for labeled outliers and normal data")
         ax.yaxis.set_visible(False)
     else:
-        ax.set_ylabel(datasets[dataset_iteration], labelpad=10, fontsize=15)
+        ax.set_ylabel(datasets[dataset_iteration], labelpad=10, fontsize=20)
     ax.set(xlim=(0, 2), xticks=[], ylim=(0.5, 1), yticks=np.arange(0.5, 1.01, 0.1))
+    ax.tick_params(axis="y", labelsize=15)
     if dataset_iteration == 2:
-        ax.set_xlabel(f"0.{decimals[decimal_iteration]}", labelpad=10, fontsize=15)
+        ax.set_xlabel(f"0.{decimals[decimal_iteration]} (0.0{decimals[decimal_iteration]})", labelpad=20, fontsize=20)
 
 
 if __name__ == "__main__":
@@ -50,10 +51,10 @@ if __name__ == "__main__":
                 make_subplot(dataset_iteration, decimal_iteration, data[0], data[1], data[2])
 
     fig.subplots_adjust(wspace=0, hspace=0.1)
-    fig.supxlabel("ratio of labeled normal data", fontsize=20)
+    fig.supxlabel("ratio labeled normal data (ratio labeled outliers)", fontsize=25)
 
-    plt.subplots_adjust(right=0.8)
-    plt.legend(bbox_to_anchor=(2.1, 3.2))
+    plt.subplots_adjust(right=0.6)
+    plt.legend(bbox_to_anchor=(4.0, 3.2), fontsize=20)
     plt.show()
 
 
