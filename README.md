@@ -77,12 +77,12 @@ For the Deep SAD implementation different options in the command line can be use
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;&nbsp;default is `0.0`  
 &nbsp;
 
-This means, that Deep SAD using MNIST, the `standard` mode, with the weight `3`, the `0` category as normal class, the `1` category as anomaly class, a labeled 
+This means, that Deep SAD using MNIST, the `"standard"` mode, with the weight `3`, the `0` category as normal class, the `1` category as anomaly class, a labeled 
 anomaly ratio of `0.05`, no labeled normal data, a pollution of `0.1` in the unlabeled data, and no pollution in the labeled anomalies, can be run by using:
 ```
 python DeepSAD.py
 ```
-Deep SAD using CIFAR-10, the `extended` mode, with the weight `2` for labeled normal data, and a secondary weight `4` for labeled anomalies, 
+Deep SAD using CIFAR-10, the `"extended"` mode, with the weight `2` for labeled normal data, and a secondary weight `4` for labeled anomalies, 
 the `1` category as normal class, the `2` category as anomaly class, a labeled anomaly ratio of `0.01`, a labeled normal data ratio of `0.1`, 
 a pollution of `0.1` in the unlabeled data, and a pollution of `0.01` in the labeled anomalies, can for example be run by using:
 ```
