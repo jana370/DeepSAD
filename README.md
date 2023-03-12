@@ -32,40 +32,49 @@ python make_graphic_pollution.py
 &nbsp;
 
 For the Deep SAD implementation different options in the command line can be used:  
-`-d` or `--dataset`:&emsp; choose the dataset which will be used; either `"mnist"`, `"fmnist"`, or `"cifar10"` can be used; default is `"mnist"`  
+`-d` or `--dataset`:&emsp; choose the dataset which will be used; either `"mnist"`, `"fmnist"`, or `"cifar10"` can be used;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `"mnist"`  
 `-m` or `--mode`:&emsp; choose the type of loss function, which will be used for Deep SAD;  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`"standard"` will treat labeled normal data the same as unlabeled data and use the weight only for labeled anomalies;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`"standard"` will treat labeled normal data the same as unlabeled data and use the weight only for  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;labeled anomalies;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`"standard_normal"` will use the weight for both labeled normal data and labeled anomalies;  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`"extended"` will use the weight for the labeled normal data and the second weight for the labeled anomalies;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`"extended"` will use the weight for the labeled normal data and the second weight for the labeled  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;anomalies;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;default is `"standard"`  
-`-w` or `--weight`:&emsp; choose the weight that will be used in the loss function; Note, that this only defines the weight for the labeled normal data  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; if the `"extended"` mode is used; default is `3`   
-`-sw` or `--second_weight`:&emsp; choose the second weight that will be used for the labeled anomalies if the `"extended"` mode is used;  
+`-w` or `--weight`:&emsp; choose the weight that will be used in the loss function; Note, that this only defines the weight  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; for the labeled normal data if the `"extended"` mode is used;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; default is `3`   
+`-sw` or `--second_weight`:&emsp; choose the second weight that will be used for the labeled anomalies if the `"extended"`  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;mode is used;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `4`  
 `-cn` or `--category_normal`:&emsp; choose category which will be used as the normal class, the following categories are defined for each  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;dataset:  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;MNIST: `0`: 0, 6, 8, and 9; `1`: 1, 4, and 7; `2`: 2, 3, and 5;  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;F-MNIST: `0`: T_shirt, Pullover, Coat, and Shirt; `1`: Trouser, and Dress; `2`: 
-Sandal, Sneaker, Bag, and Ankleboot;  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;CIFAR-10: `0`: plane, car, ship, and truck; `1`: bird, and frog; `2`: 
-cat, deer, dog, and horse;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;F-MNIST: `0`: T_shirt, Pullover, Coat, and Shirt; `1`: Trouser, and Dress;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;`2`: Sandal, Sneaker, Bag, and Ankleboot;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;CIFAR-10: `0`: plane, car, ship, and truck; `1`: bird, and frog;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;`2`: cat, deer, dog, and horse;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `0`  
-`-ca` or `--category_anomaly`:&emsp; choose category which will be used as the anomaly class, the following categories are defined for each  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;dataset:  
+`-ca` or `--category_anomaly`:&emsp; choose category which will be used as the anomaly class, the following categories are  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;defined for each dataset:  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;MNIST: `0`: 0, 6, 8, and 9; `1`: 1, 4, and 7; `2`: 2, 3, and 5;  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;F-MNIST: `0`: T_shirt, Pullover, Coat, and Shirt; `1`: Trouser, and Dress; `2`: 
-Sandal, Sneaker, Bag, and Ankleboot;  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;CIFAR-10: `0`: plane, car, ship, and truck; `1`: bird, and frog; `2`: 
-cat, deer, dog, and horse;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;F-MNIST: `0`: T_shirt, Pullover, Coat, and Shirt; `1`: Trouser, and Dress;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`2`: Sandal, Sneaker, Bag, and Ankleboot;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;CIFAR-10: `0`: plane, car, ship, and truck; `1`: bird, and frog;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`2`: cat, deer, dog, and horse;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;default is `1`  
-`-ra` or `--ratio_anomaly`:&emsp; choose the ratio of labeled anomalies that will be used; Note, that the value should be between `0` and `1`;  
+`-ra` or `--ratio_anomaly`:&emsp; choose the ratio of labeled anomalies that will be used; Note, that the value should be 
+between `0` and `1`;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `0.05`  
-`-rn` or `--ratio_normal`:&emsp; choose the ratio of labeled normal data that will be used; Note, that the value should be between `0` and `1`;  
+`-rn` or `--ratio_normal`:&emsp; choose the ratio of labeled normal data that will be used; Note, that the value should be  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;between `0` and `1`;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;default is `0.0`  
-`-rpu` or `--ratio_pollution_unlabeled`:&emsp; choose the ratio of pollution in the unlabeled data; Note, that the value should be between `0` and  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;`1`; default is `0.1`    
-`-rpl` or `--ratio_pollution_labeled`:&emsp; choose the ratio of pollution in the labeled anomalies; Note, that the value should be between `0` and  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;`1`; default is `0.0`  
+`-rpu` or `--ratio_pollution_unlabeled`:&emsp; choose the ratio of pollution in the unlabeled data; Note, that the value  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;should be between `0` and `1`;   
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `0.1`    
+`-rpl` or `--ratio_pollution_labeled`:&emsp; choose the ratio of pollution in the labeled anomalies; Note, that the value  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;should be between `0` and `1`;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `0.0`  
 &nbsp;
 
 This means, that Deep SAD using MNIST, the `standard` mode, with the weight `3`, the `0` category as normal class, the `1` category as anomaly class, a labeled 
