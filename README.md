@@ -47,8 +47,8 @@ For the Deep SAD implementation different options in the command line can be use
 `-sw` or `--second_weight`:&emsp; choose the second weight that will be used for the labeled anomalies if the `"extended"`  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;mode is used;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `4`  
-`-cn` or `--category_normal`:&emsp; choose category which will be used as the normal class, the following categories are defined for each  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;dataset:  
+`-cn` or `--category_normal`:&emsp; choose category which will be used as the normal class, the following categories  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;are defined for each dataset:  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;MNIST: `0`: 0, 6, 8, and 9; `1`: 1, 4, and 7; `2`: 2, 3, and 5;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;F-MNIST: `0`: T_shirt, Pullover, Coat, and Shirt; `1`: Trouser, and Dress;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;`2`: Sandal, Sneaker, Bag, and Ankleboot;  
@@ -64,7 +64,7 @@ For the Deep SAD implementation different options in the command line can be use
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;`2`: cat, deer, dog, and horse;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;default is `1`  
 `-ra` or `--ratio_anomaly`:&emsp; choose the ratio of labeled anomalies that will be used; Note, that the value should be 
-between `0` and `1`;  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;between `0` and `1`;  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;default is `0.05`  
 `-rn` or `--ratio_normal`:&emsp; choose the ratio of labeled normal data that will be used; Note, that the value should be  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;between `0` and `1`;  
