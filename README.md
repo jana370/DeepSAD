@@ -82,7 +82,7 @@ anomaly ratio of `0.05`, no labeled normal data, a pollution of `0.1` in the unl
 ```
 python DeepSAD.py
 ```
-Deep SAD using CIFAR-10, the `"extended"` mode, with the weight `2` for labeled normal data, and a secondary weight `4` for labeled anomalies, 
+Deep SAD using CIFAR-10, the `"extended"` mode, with the weight `2` for labeled normal data, and a second weight `4` for labeled anomalies, 
 the `1` category as normal class, the `2` category as anomaly class, a labeled anomaly ratio of `0.01`, a labeled normal data ratio of `0.1`, 
 a pollution of `0.1` in the unlabeled data, and a pollution of `0.01` in the labeled anomalies, can for example be run by using:
 ```
