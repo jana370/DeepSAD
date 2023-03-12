@@ -4,7 +4,7 @@ The code is written in `Python 3.10`, the required packages are given in `requir
 
 To run the code clone the repository to the current directory of your machine:
 ```
-git clone https://github.com/jana370/DeepSAD.git
+git clone https://github.com/jana370/DeepSAD.
 ```
 
 It is recommended to set up a virtual environment to run the code: 
