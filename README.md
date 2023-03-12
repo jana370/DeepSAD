@@ -78,7 +78,7 @@ For the Deep SAD implementation different options in the command line can be use
 &nbsp;
 
 This means, that Deep SAD using MNIST, the `standard` mode, with the weight `3`, the `0` category as normal class, the `1` category as anomaly class, a labeled 
-anomaly ratio of `0.05`, no labeled normal data, a pollution of `0.1` in the unlabeled data, and no pollution in the labeled anomalies, can for example be run by using:
+anomaly ratio of `0.05`, no labeled normal data, a pollution of `0.1` in the unlabeled data, and no pollution in the labeled anomalies, can be run by using:
 ```
 python DeepSAD.py
 ```
