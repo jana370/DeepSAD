@@ -1,39 +1,35 @@
 import numpy as np
 import tensorflow as tf
-from matplotlib import pyplot as plt
 
 
 class PreProcessing():
     
-    def __init__(self, datasetname, normal_class:list, known_outlier_class: list, 
-                 ratio_known_normal = 0.0, ratio_known_outlier = 0.01, ratio_pollution = 0.0, ratio_polluted_label_data = 0.0):
-        self.datasetname = datasetname
+    def __init__(self, dataset_name, normal_class, known_outlier_class, ratio_known_normal, ratio_known_outlier,
+                 ratio_pollution, ratio_polluted_label_data):
+        self.dataset_name = dataset_name
         self.normal_class = normal_class
         self.known_outlier_classes = known_outlier_class
-        self.outlier_class = list(range(0, 10))
+        self.outlier_class = list(range(10))
         self.outlier_class = [i for i in self.outlier_class if i not in self.normal_class]
         self.outlier_class = [i for i in self.outlier_class if i not in self.known_outlier_classes]
-        print(self.outlier_class)
         self.ratio_known_normal = ratio_known_normal
-        self. ratio_known_outlier = ratio_known_outlier
+        self.ratio_known_outlier = ratio_known_outlier
         self.ratio_pollution = ratio_pollution
         self.ratio_polluted_label_data = ratio_polluted_label_data
     
     def load_dataset(self):
-        if self.datasetname == "mnist":
+        if self.dataset_name == "mnist":
             (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-        elif self.datasetname == "fmnist":
+        elif self.dataset_name == "fmnist":
             (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
-        elif self.datasetname == "cifar10":
+        elif self.dataset_name == "cifar10":
             (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
         x_train, x_test = x_train / 255.0, x_test / 255.0
         train_dataset = (x_train, y_train)
         test_dataset = (x_test, y_test)
         return train_dataset, test_dataset
     
-    def make_data_semisupervised(self, dataset: tuple):
-                                
-
+    def make_data_semisupervised(self, dataset):
         index_normal = np.argwhere(np.isin(dataset[1], self.normal_class)).flatten()
         index_outlier = np.argwhere(np.isin(dataset[1], self.outlier_class)).flatten()
         index_known_outlier = np.argwhere(np.isin(dataset[1], self.known_outlier_classes)).flatten()
@@ -42,8 +38,10 @@ class PreProcessing():
         
         # Solve system of linear equations to obtain respective number of samples
         a = np.array([[1, 1, 0, 0],
-                    [(1-self.ratio_known_normal), -self.ratio_known_normal, -self.ratio_known_normal, -self.ratio_known_normal],
-                    [-self.ratio_known_outlier, -self.ratio_known_outlier, -self.ratio_known_outlier, (1-self.ratio_known_outlier)],
+                    [(1-self.ratio_known_normal), -self.ratio_known_normal, -self.ratio_known_normal,
+                     -self.ratio_known_normal],
+                    [-self.ratio_known_outlier, -self.ratio_known_outlier, -self.ratio_known_outlier,
+                     (1-self.ratio_known_outlier)],
                     [0, -self.ratio_pollution, (1-self.ratio_pollution), 0]])
         b = np.array([n_normal, 0, 0, 0])
         x = np.linalg.solve(a, b)
@@ -75,6 +73,7 @@ class PreProcessing():
         labeled_data_list= []
         labeled_labels_list = []
         labeled_new_labels_list = []
+
         for index in idx_known_normal:
             labeled_data_list.append(dataset[0][index])
             labeled_labels_list.append(dataset[1][index])
@@ -95,12 +94,11 @@ class PreProcessing():
             labeled_labels_list.append(dataset[1][index])
             labeled_new_labels_list.append(1)
         
-        labeled_data_array= np.array(labeled_data_list)
-        labeled_labels_array = np.array(labeled_labels_list)
+        labeled_data_array = np.array(labeled_data_list)
         labeled_new_labels_array = np.array(labeled_new_labels_list)
         labeled_data = (labeled_data_array, labeled_new_labels_array)
     
-        unlabeled_data_list= []
+        unlabeled_data_list = []
         unlabeled_labels_list = []
         unlabeled_new_labels_list = []
         
@@ -114,11 +112,9 @@ class PreProcessing():
             unlabeled_labels_list.append(dataset[1][index])
             unlabeled_new_labels_list.append(0)   
             
-        unlabeled_data_array= np.array(unlabeled_data_list)
-        unlabeled_labels_array = np.array(unlabeled_labels_list)
+        unlabeled_data_array = np.array(unlabeled_data_list)
         unlabeled_new_labels_array = np.array(unlabeled_new_labels_list)
         unlabeled_data = (unlabeled_data_array, unlabeled_new_labels_array)
-        #combine data: np.hstack((unlabeled_data_array, labeled_data_array))    
         return labeled_data, unlabeled_data
     
     def relabel_test_data(self, dataset: tuple):
@@ -142,11 +138,4 @@ class PreProcessing():
         #labeled data: tuple of an image array and an array with new labels
         #unlabeled data: array of images
         return labeled_data, unlabeled_data
-        
-if __name__ == "__main__":
-    data = PreProcessing("mnist", [1], [2], [3])
-    test_data = data.get_test_data()
-    labeled, unlabeled = data.get_train_data()
-    plt.imshow(unlabeled[3333], cmap='gray')
-    plt.show()
     

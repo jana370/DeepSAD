@@ -11,8 +11,8 @@ def get_data(dataset, decimal, architecture=""):
 
 
 def get_statistics(data):
-    tuple = (statistics.mean(data), statistics.stdev(data))
-    return tuple
+    return statistics.mean(data), statistics.stdev(data)
+
 
 def make_subplot(dataset_iteration, decimal_iteration, data1, data2=None, data3=None):
     ax = plt.subplot(3, 4, dataset_iteration * 4 + decimal_iteration + 1)

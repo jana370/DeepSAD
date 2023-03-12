@@ -11,9 +11,7 @@ def get_data(dataset, decimal):
 
 
 def get_statistics(data):
-    tuple = (statistics.mean(data), statistics.stdev(data))
-    return tuple
-
+    return statistics.mean(data), statistics.stdev(data)
 
 
 def make_subplot(dataset_iteration, data1, data2, data3):
@@ -26,12 +24,9 @@ def make_subplot(dataset_iteration, data1, data2, data3):
     mean, sd = get_statistics(data3)
     plt.errorbar(1.5, mean, sd, fmt="o", linewidth=4, capsize=8, color="darkgreen",
                  label="0.05 pollution")
-    #ax.yaxis.set_visible(False)
     ax.set_ylabel(datasets[dataset_iteration], labelpad=10, fontsize=20)
     ax.tick_params(axis="y", labelsize=15)
     ax.set(xlim=(0, 2), xticks=[], ylim=(0.5, 1), yticks=np.arange(0.5, 1.01, 0.1))
-
-
 
 
 if __name__ == "__main__":
@@ -44,8 +39,6 @@ if __name__ == "__main__":
         make_subplot(dataset_iteration, data[0], data[1], data[2])
 
     fig.subplots_adjust(wspace=0, hspace=0.1)
-    #fig.supxlabel("ratio of labeled normal data", fontsize=20)
-
     plt.subplots_adjust(right=0.3)
     plt.legend(bbox_to_anchor=(1.8, 3.2), fontsize=20)
     plt.show()

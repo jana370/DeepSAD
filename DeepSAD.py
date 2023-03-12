@@ -104,10 +104,12 @@ def train_step_encoder(data, center, mode, weight, second_weight):
         unlabeled_predictions = tf.gather(predictions, unlabeled_mask)
         unlabeled_differences = tf.norm(tf.subtract(unlabeled_predictions, center), axis=2) ** 2
         unlabeled_loss = tf.reduce_sum(unlabeled_differences) / data[0].shape[0]
+
         labeled_normal_mask = tf.where(data[1] == 1)
         labeled_normal_predictions = tf.gather(predictions, labeled_normal_mask)
         labeled_normal_differences = tf.norm(tf.subtract(labeled_normal_predictions, center), axis=2) ** 2
         labeled_normal_loss = tf.reduce_sum(labeled_normal_differences) / data[0].shape[0]
+
         labeled_outlier_mask = tf.where(data[1] == -1)
         labeled_outlier_predictions = tf.gather(predictions, labeled_outlier_mask)
         labeled_outlier_differences = (1 / tf.norm(tf.subtract(labeled_outlier_predictions, center), axis=2)) ** 2+1e-5
@@ -119,6 +121,7 @@ def train_step_encoder(data, center, mode, weight, second_weight):
             loss = unlabeled_loss + weight * (labeled_normal_loss + labeled_outlier_loss)
         if mode == "extended":
             loss = unlabeled_loss + weight * labeled_normal_loss + second_weight * labeled_outlier_loss
+
     gradients = tape.gradient(loss, encoder.trainable_variables)
     optimizer.apply_gradients(zip(gradients, encoder.trainable_variables))
     train_loss(loss)
@@ -145,13 +148,13 @@ if __name__ == "__main__":
                         help="choose the second weight that will be used for the labeled anomalies if the \"extended\" "
                              "mode is used; default is 4")
     parser.add_argument("-cn", "--category_normal", metavar="", default=0, type=int, choices=range(3),
-                        help="choose category which will be used as the normal category, the following categories are"
+                        help="choose category which will be used as the normal class, the following categories are"
                              "defined for each dataset: MNIST: 0: (0, 6, 8, and 9), 1: (1, 4, and 7), 2: (2, 3, and 5);"
                              "F-MNIST: 0: (T_shirt, Pullover, Coat, and Shirt), 1: (Trouser, and Dress), 2: (Sandal, " 
                              "Sneaker, Bag, and Ankleboot); CIFAR-10: 0: (plane, car, ship, and truck), 1: (bird, and "
                              "frog), 2: (cat, deer, dog, and horse); default is 0")
     parser.add_argument("-ca", "--category_anomaly", metavar="", default=1, type=int, choices=range(3),
-                        help="choose category which will be used as the anomaly category, the following categories are"
+                        help="choose category which will be used as the anomaly class, the following categories are"
                              "defined for each dataset: MNIST: 0: (0, 6, 8, and 9), 1: (1, 4, and 7), 2: (2, 3, and 5);"
                              "F-MNIST: 0: (T_shirt, Pullover, Coat, and Shirt), 1: (Trouser, and Dress), 2: (Sandal, "
                              "Sneaker, Bag, and Ankleboot); CIFAR-10: 0: (plane, car, ship, and truck), 1: (bird, and "
@@ -162,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument("-rn", "--ratio_normal", metavar="", default=0.0, type=float,
                         help="choose the ratio of labeled normal data that will be used; Note, that the value should "
                              "be between 0 and 1; default is 0.0")
-    parser.add_argument("-rpn", "--ratio_pollution_normal", metavar="", default=0.1, type=float,
+    parser.add_argument("-rpu", "--ratio_pollution_unlabeled", metavar="", default=0.1, type=float,
                         help="choose the ratio of pollution in the unlabeled data; Note, that the value should "
                              "be between 0 and 1; default is 0.1")
     parser.add_argument("-rpl", "--ratio_pollution_labeled", metavar="", default=0.0, type=float,
@@ -171,7 +174,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    dataset = args.dataset
+    dataset = args.dataset.lower()
     mode = args.mode
     weight = args.weight
     second_weight = args.second_weight
@@ -194,7 +197,7 @@ if __name__ == "__main__":
                                                categories[args.category_anomaly],
                                                ratio_known_outlier=args.ratio_anomaly,
                                                ratio_known_normal=args.ratio_normal,
-                                               ratio_pollution=args.ratio_pollution_normal,
+                                               ratio_pollution=args.ratio_pollution_unlabeled,
                                                ratio_polluted_label_data=args.ratio_pollution_labeled)
     (labeled_data, labeled_data_labels), (unlabeled_data, unlabeled_data_labels) = Preprocessor.get_train_data()
     (test_data, test_data_labels) = Preprocessor.get_test_data()
