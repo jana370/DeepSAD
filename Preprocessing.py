@@ -4,6 +4,18 @@ import tensorflow as tf
 
 class PreProcessing():
     
+    """A class for Preprocessing the data so it can be used in a semi-supervised setting.
+    Attributes: 
+        :dataset_name: name of the used data set ("mnist", "fmnist", or "cifar10")
+        :normal_class: list with labels of class(es) chosen as normal class(es)
+        :outlier_class: list with labels of class(es) chosen as anomaly class(es)
+        :known_outlier_classes: list with labels of class(es) chosen as known anomaly class(es)
+        :ratio_known_normal: the desired ratio of known (labeled) normal samples
+        :ratio_known_outlier: the desired ratio of known (labeled) anomalous samples
+        :ratio_pollution: the desired pollution ratio of the unlabeled data with unknown (unlabeled) anomalies
+        :ratio_polluted_label_data: the desired pollution ratio of the labeled data.
+    """
+    
     def __init__(self, dataset_name, normal_class, known_outlier_class, ratio_known_normal, ratio_known_outlier,
                  ratio_pollution, ratio_polluted_label_data):
         self.dataset_name = dataset_name
