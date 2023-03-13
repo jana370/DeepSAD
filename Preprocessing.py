@@ -46,7 +46,7 @@ class PreProcessing():
         b = np.array([n_normal, 0, 0, 0])
         x = np.linalg.solve(a, b)
 
-        # Get number of samples
+        # Get number of samples per "type" of data point (e.g. unlabeled, outlier, etc.)
         n_known_normal = int(x[0])
         n_unlabeled_normal = int(x[1])
         n_unlabeled_outlier = int(x[2])
@@ -56,13 +56,13 @@ class PreProcessing():
         n_wrong_label_outlier = int(self.ratio_polluted_label_data*n_known_outlier)            
         n_known_normal = int(n_known_normal - n_wrong_label_normal)
         n_known_outlier = int(n_known_outlier - n_wrong_label_outlier)
-        #Grundgesamtheit: normal data + polluted data, known outlier ratio ist Prozent von dieser Gesamtheit
-        #wenn polluted data and known outlier 0, dann gibt es keine outlier
         
+        #shuffle to pick random datapoints for labeled data etc.
         shuffled_normal = np.random.permutation(n_normal)
         shuffled_outlier = np.random.permutation(len(index_outlier))
         shuffled_known_outlier = np.random.permutation(len(index_known_outlier))
 
+        #get indices of data points to use as labeled or unlabeled, outlier or normal data
         idx_known_normal = index_normal[shuffled_normal[:n_known_normal]].tolist()
         idx_unlabeled_normal = index_normal[shuffled_normal[n_known_normal:n_known_normal+n_unlabeled_normal]].tolist()
         idx_wrong_labels_normal = index_normal[shuffled_normal[n_known_normal+n_unlabeled_normal:n_known_normal+n_unlabeled_normal+n_wrong_label_normal]].tolist()
@@ -70,6 +70,7 @@ class PreProcessing():
         idx_known_outlier = index_known_outlier[shuffled_known_outlier[:n_known_outlier]].tolist()
         idx_wrong_labels_outlier = index_known_outlier[shuffled_known_outlier[n_known_outlier:n_known_outlier+n_wrong_label_outlier]].tolist()     
         
+        #get the semi-supervised setting labels for the labeled data (1 for normal, -1 for outlier)
         labeled_data_list= []
         labeled_labels_list = []
         labeled_new_labels_list = []
@@ -96,8 +97,10 @@ class PreProcessing():
         
         labeled_data_array = np.array(labeled_data_list)
         labeled_new_labels_array = np.array(labeled_new_labels_list)
+        #put datapoints and new label together
         labeled_data = (labeled_data_array, labeled_new_labels_array)
     
+        #get the "labels" for the unlabeled data (0 for no unknown)
         unlabeled_data_list = []
         unlabeled_labels_list = []
         unlabeled_new_labels_list = []
@@ -135,7 +138,5 @@ class PreProcessing():
     def get_train_data(self):
         train_data, test_data = self.load_dataset()
         labeled_data, unlabeled_data = self.make_data_semisupervised(train_data)
-        #labeled data: tuple of an image array and an array with new labels
-        #unlabeled data: array of images
         return labeled_data, unlabeled_data
     
