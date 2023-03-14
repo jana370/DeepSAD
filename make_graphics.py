@@ -6,18 +6,18 @@ import numpy as np
 
 
 def get_data(dataset, decimal, architecture=""):
-    # get data from .csv-files
+    """get data from .csv-files"""
     data = pd.read_csv(pathlib.Path(f"results/{dataset}_{architecture}mode0_{decimal}.csv"), names=["a"])
     return data["a"].values.tolist()
 
 
 def get_statistics(data):
-    # return mean and sd of data
+    """return mean and sd of data"""
     return statistics.mean(data), statistics.stdev(data)
 
 
 def make_subplot(dataset_iteration, decimal_iteration, data1, data2=None, data3=None):
-    # create subplot for given dataset and test condition
+    """create subplot for given dataset and test condition"""
     ax = plt.subplot(3, 4, dataset_iteration * 4 + decimal_iteration + 1)
     mean, sd = get_statistics(data1)
     # error bar for using no labeled data

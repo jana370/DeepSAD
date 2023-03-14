@@ -7,7 +7,7 @@ from sklearn import metrics
 
 
 def convolutional_module(input, filters, kernel_size):
-    # define convolutional modules used in encoder parts of NN
+    """define convolutional modules used in encoder parts of NN"""
     x = layers.Conv2D(filters=filters, kernel_size=kernel_size, padding="same", use_bias=False,
                       kernel_regularizer=tf.keras.regularizers.l2(1e-5))(input)
     x = layers.BatchNormalization()(x)
@@ -17,7 +17,7 @@ def convolutional_module(input, filters, kernel_size):
 
 
 def deconvolutional_module(input, filters, kernel_size, final_layer=False):
-    # define deconvolutional modules used in decoder parts of NN
+    """define deconvolutional modules used in decoder parts of NN"""
     x = layers.LeakyReLU(alpha=0.1)(input)
     x = layers.UpSampling2D((2, 2))(x)
     if not final_layer:
@@ -31,7 +31,7 @@ def deconvolutional_module(input, filters, kernel_size, final_layer=False):
 
 
 def create_neural_network_mnist():
-    # define NN for MNIST
+    """define NN for MNIST"""
     inputs = tf.keras.Input(shape=(28, 28, 1))
     x = convolutional_module(inputs, 8, 5)
     x = convolutional_module(x, 4, 5)
@@ -55,7 +55,7 @@ def create_neural_network_mnist():
 
 
 def create_neural_network_cifar10():
-    # define NN for CIFAR-10
+    """define NN for CIFAR-10"""
     inputs = tf.keras.Input(shape=(32, 32, 3))
     x = convolutional_module(inputs, 32, 5)
     x = convolutional_module(x, 64, 5)
@@ -77,7 +77,7 @@ def create_neural_network_cifar10():
 
 
 def create_neural_network_fmnist():
-    # define NN for F-MNIST
+    """define NN for F-MNIST"""
     inputs = tf.keras.Input(shape=(28, 28, 1))
     x = convolutional_module(inputs, 16, 5)
     x = convolutional_module(x, 32, 5)
@@ -106,7 +106,7 @@ def create_neural_network_fmnist():
 
 @tf.function
 def train_step_encoder(data, center, mode, weight, second_weight):
-    # training step for Deep SAD
+    """training step for Deep SAD"""
     with tf.GradientTape() as tape:
         predictions = encoder(data[0], training=True)
 

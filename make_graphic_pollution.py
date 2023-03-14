@@ -6,18 +6,18 @@ import numpy as np
 
 
 def get_data(dataset, decimal):
-    # get data from .csv-files
+    """get data from .csv-files"""
     data = pd.read_csv(pathlib.Path(f"results/{dataset}_standard_pollution0_{decimal}.csv"), names=["a"])
     return data["a"].values.tolist()
 
 
 def get_statistics(data):
-    # return mean and sd of data
+    """return mean and sd of data"""
     return statistics.mean(data), statistics.stdev(data)
 
 
 def make_subplot(dataset_iteration, data1, data2, data3):
-    # create subplot for given dataset
+    """create subplot for given dataset"""
     ax = plt.subplot(3, 1, dataset_iteration + 1)
     mean, sd = get_statistics(data1)
     # error bar for using no pollution
