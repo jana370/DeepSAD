@@ -30,6 +30,7 @@ class PreProcessing():
         self.ratio_polluted_label_data = ratio_polluted_label_data
     
     def load_dataset(self):
+        """Loads the dataset."""
         if self.dataset_name == "mnist":
             (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
         elif self.dataset_name == "fmnist":
@@ -42,6 +43,7 @@ class PreProcessing():
         return train_dataset, test_dataset
     
     def make_data_semisupervised(self, dataset):
+        """Labels the data (1 for normal labeled data and -1 for anomalous labeled data) for the semi-supervised setting."""
         index_normal = np.argwhere(np.isin(dataset[1], self.normal_class)).flatten()
         index_outlier = np.argwhere(np.isin(dataset[1], self.outlier_class)).flatten()
         index_known_outlier = np.argwhere(np.isin(dataset[1], self.known_outlier_classes)).flatten()
@@ -133,6 +135,7 @@ class PreProcessing():
         return labeled_data, unlabeled_data
     
     def relabel_test_data(self, dataset: tuple):
+        """labels the data to differentiate outlier and normal data"""
         new_labels = np.empty(len(dataset[0]))
         for i, label in enumerate(dataset[1]):
             if label in self.normal_class:
@@ -143,11 +146,13 @@ class PreProcessing():
         return test_data
     
     def get_test_data(self):
+        """loads the data and puts together the test data and the new labels"""
         train_data, test_data = self.load_dataset()
         test_data = self.relabel_test_data(test_data)
         return test_data
     
     def get_train_data(self):
+        """loads the data and puts together the training data and the new labels"""
         train_data, test_data = self.load_dataset()
         labeled_data, unlabeled_data = self.make_data_semisupervised(train_data)
         return labeled_data, unlabeled_data
